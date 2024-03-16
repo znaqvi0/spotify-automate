@@ -1,3 +1,5 @@
 .idea/
 __pycache__/
 .cache
+secret_variables.py
+old_files/
