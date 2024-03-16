@@ -131,7 +131,6 @@ def wait_until_spotify_open(max_time, path):
             break
 
 
-
 async def open_play(path):
     # open_spotify_minimized(path)
     # await asyncio.sleep(2.8)
