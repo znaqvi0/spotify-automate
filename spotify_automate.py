@@ -208,6 +208,7 @@ client_secret = SPOTIFY_CLIENT_SECRET
 redirect_uri = 'http://localhost:8000'
 
 
+# to recreate the .exe file use command pyinstaller --onefile --add-data 'secret_variables.py;.' spotify_automate.py
 def run_program():
     # Run the main loop using an event loop
     try:
@@ -217,6 +218,9 @@ def run_program():
         os.system(f'taskkill /pid {os.getpid()} /f')
     except requests.exceptions.ReadTimeout:
         print("--------------------\nhandling ReadTimeout\n--------------------")
+        run_program()
+    except requests.exceptions.ConnectionError:
+        print("--------------------\nhandling ConnectionError\n--------------------")
         run_program()
 
 
