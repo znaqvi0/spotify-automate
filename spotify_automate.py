@@ -12,7 +12,13 @@ import win32gui
 from spotipy.oauth2 import SpotifyOAuth
 import ctypes
 
-from secret_variables import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
+from dotenv import load_dotenv
+
+load_dotenv()
+
+client_id = os.getenv('SPOTIFY_CLIENT_ID')
+client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+
 
 ES_CONTINUOUS = 0x80000000
 ES_SYSTEM_REQUIRED = 0x00000001
@@ -185,12 +191,10 @@ async def run_main(client_id, client_secret, redirect_uri, path, sleep):
 spotify_path = 'C:\\Users\\znaqv\\AppData\\Roaming\\Spotify\\Spotify.exe'
 sleep_time = 5
 
-client_id = SPOTIFY_CLIENT_ID
-client_secret = SPOTIFY_CLIENT_SECRET
 redirect_uri = 'http://localhost:8000'
 
 
-# to recreate the .exe file use command pyinstaller --onefile --add-data 'secret_variables.py;.' spotify_automate.py
+# to recreate the .exe file use command pyinstaller --onefile spotify_automate.py
 def run_program():
     # Run the main loop using an event loop
     try:

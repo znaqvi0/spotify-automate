@@ -1,5 +1,7 @@
 .idea/
 __pycache__/
 .cache
-secret_variables.py
+.env
 old_files/
+spotify_automate.spec
+build/
