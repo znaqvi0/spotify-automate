@@ -10,7 +10,6 @@ import spotipy
 import win32con
 import win32gui
 from spotipy.oauth2 import SpotifyOAuth
-from spotipy.oauth2 import SpotifyClientCredentials
 import ctypes
 
 from secret_variables import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
@@ -21,16 +20,11 @@ ES_DISPLAY_REQUIRED = 0x00000002
 
 
 def authorize(client_id, client_secret, redirect_uri):
-    # Authenticate with Spotify
-    client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-    # Set up authentication and authorization
     auth_manager = SpotifyOAuth(client_id=client_id,
                                 client_secret=client_secret,
                                 redirect_uri=redirect_uri,
                                 scope='user-read-playback-state user-read-currently-playing')
-    sp = spotipy.Spotify(auth_manager=auth_manager)
-    return sp
+    return spotipy.Spotify(auth_manager=auth_manager)
 
 
 def prevent_sleep(es_continuous, es_system_required, es_display_required):
@@ -47,11 +41,10 @@ def force_close_spotify():
 
 
 def get_current_audio(result):
-    if result is not None:
-        if result['currently_playing_type'] == 'ad':
-            return 'Advertisement'
-    else:
+    if not result:
         return None
+    if result['currently_playing_type'] == 'ad':
+        return 'Advertisement'
 
     track = result['item']
     name = track['name']
@@ -83,21 +76,21 @@ def open_spotify_minimized(path):
 def is_advertisement_playing(result):
     keyword = "Advertisement"
     current_audio = get_current_audio(result)
-    if current_audio is not None:
-        if keyword in current_audio:
-            return True
-    return False
+    if not current_audio:
+        return False
+
+    return keyword in current_audio
 
 
 def song_time_left(result):
-    if result is not None:
-        # maybe remove/change the condition here
-        if not is_advertisement_playing(result):
-            progress_ms = result['progress_ms']
-            duration_ms = result['item']['duration_ms']
-            time_left_ms = duration_ms - progress_ms
-            return time_left_ms
-    return None
+    if not result:
+        return None
+    # maybe remove/change the condition here
+    if not is_advertisement_playing(result):
+        progress_ms = result['progress_ms']
+        duration_ms = result['item']['duration_ms']
+        time_left_ms = duration_ms - progress_ms
+        return time_left_ms
 
 
 def play_pause_media():
@@ -105,7 +98,6 @@ def play_pause_media():
 
 
 def open_spotify_behind(path):
-    # Open Spotify app
     subprocess.Popen(path, shell=True)
     # Wait for Spotify window to appear
     while True:
@@ -134,14 +126,6 @@ async def open_play(path):
     play_pause_media()
 
 
-def force_close_spotify_if_not_responding():
-    spotify_processes = [proc for proc in psutil.process_iter() if proc.name() == 'Spotify.exe']
-    if len(spotify_processes) == 1:
-        spotify_processes[0].kill()
-        return True
-    return False
-
-
 def wait_until_spotify_closed(max_time):
     initial_time = time.time()
     close_spotify()
@@ -157,18 +141,16 @@ def wait_until_spotify_closed(max_time):
 
 
 async def spotify_running_check(result, path):
-    if result is None:
-        if not is_spotify_running():
-            await open_play(path)
-        # if force_close_spotify_if_not_responding():
-        #     wait_until_spotify_closed(2)
-        #     await open_play(path)
+    if result:
+        return
+    if not is_spotify_running():
+        await open_play(path)
 
 
 async def time_check(result, time_left, sleep):
-    if result is not None:
-        if time_left is not None:
-            await asyncio.sleep(min(sleep, 0.7 * time_left / 1000))
+    if not (result and time_left):
+        return
+    await asyncio.sleep(min(sleep, 0.7 * time_left / 1000))
 
 
 async def advertisement_check(result, path):
