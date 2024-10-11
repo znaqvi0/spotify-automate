@@ -37,7 +37,6 @@ def prevent_sleep(es_continuous, es_system_required, es_display_required):
 
 
 def close_spotify():
-    # sends a command to the terminal to close spotify.exe
     os.system("taskkill /im spotify.exe")
 
 
@@ -68,14 +67,6 @@ def is_spotify_running():
 
 def open_spotify(path):
     subprocess.Popen(path)
-
-
-def open_spotify_minimized(path):
-    # Use the STARTF_USESHOWWINDOW flag to start the process minimized
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    # Start the Spotify process
-    subprocess.Popen(path, startupinfo=startupinfo)
 
 
 def is_advertisement_playing(result):
@@ -170,14 +161,14 @@ def advertisement_check(result, path):
 
 
 def main(sp, path, sleep):
+    prevent_sleep(ES_CONTINUOUS, ES_SYSTEM_REQUIRED, ES_DISPLAY_REQUIRED)
     result = sp.current_playback()
     if not advertisement_check(result, path):
         spotify_running_check(result, path)
 
-        prevent_sleep(ES_CONTINUOUS, ES_SYSTEM_REQUIRED, ES_DISPLAY_REQUIRED)
         time_left = song_time_left(result)
         print(get_current_audio(result),
-              f"({round(time_left / 100) / 10 if time_left is not None else 'N/A'} seconds left)")
+              f"({round(time_left / 1000, 1) if time_left is not None else 'N/A'} seconds left)")
 
         time_check(result, time_left, sleep)
 
