@@ -104,7 +104,8 @@ def play_pause_media():
 
 
 def open_spotify_behind(path):
-    subprocess.Popen(path, shell=True)
+    # subprocess.Popen(path, shell=True)
+    subprocess.Popen(path)
     # Wait for Spotify window to appear
     while True:
         window = win32gui.FindWindow(None, "Spotify Free")
@@ -115,10 +116,10 @@ def open_spotify_behind(path):
 
 
 def wait_until_spotify_open(max_time, path):
-    initial_time = time.time()
+    initial_time = time.perf_counter()
     open_spotify_behind(path)
     while True:
-        time_elapsed = time.time() - initial_time
+        time_elapsed = time.perf_counter() - initial_time
         if time_elapsed >= max_time:
             break
         spotify_processes = [proc for proc in psutil.process_iter() if proc.name() == 'Spotify.exe']
@@ -133,10 +134,10 @@ async def open_play(path):
 
 
 def wait_until_spotify_closed(max_time):
-    initial_time = time.time()
+    initial_time = time.perf_counter()
     close_spotify()
     while True:
-        current_time = time.time()
+        current_time = time.perf_counter()
         time_elapsed = current_time - initial_time
         if time_elapsed >= max_time:
             break
