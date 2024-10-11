@@ -2,6 +2,5 @@
 __pycache__/
 .cache
 .env
-old_files/
 spotify_automate.spec
 build/
