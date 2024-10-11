@@ -1,4 +1,3 @@
-import asyncio
 import os
 import subprocess
 import time
@@ -128,7 +127,7 @@ def wait_until_spotify_open(max_time, path):
             break
 
 
-async def open_play(path):
+def open_play(path):
     wait_until_spotify_open(5, path)
     play_pause_media()
 
@@ -147,46 +146,46 @@ def wait_until_spotify_closed(max_time):
             break
 
 
-async def spotify_running_check(result, path):
+def spotify_running_check(result, path):
     if result:
         return
     if not is_spotify_running():
-        await open_play(path)
+        open_play(path)
 
 
-async def time_check(result, time_left, sleep):
+def time_check(result, time_left, sleep):
     if not (result and time_left):
         return
-    await asyncio.sleep(min(sleep, 0.7 * time_left / 1000))
+    time.sleep(min(sleep, 0.7 * time_left / 1000))
 
 
-async def advertisement_check(result, path):
+def advertisement_check(result, path):
     if is_advertisement_playing(result):
         if result['is_playing']:
             play_pause_media()
         wait_until_spotify_closed(2)
-        await open_play(path)
+        open_play(path)
         return True
     return False
 
 
-async def main(sp, path, sleep):
+def main(sp, path, sleep):
     result = sp.current_playback()
-    if not await advertisement_check(result, path):
-        await spotify_running_check(result, path)
+    if not advertisement_check(result, path):
+        spotify_running_check(result, path)
 
         prevent_sleep(ES_CONTINUOUS, ES_SYSTEM_REQUIRED, ES_DISPLAY_REQUIRED)
         time_left = song_time_left(result)
         print(get_current_audio(result),
               f"({round(time_left / 100) / 10 if time_left is not None else 'N/A'} seconds left)")
 
-        await time_check(result, time_left, sleep)
+        time_check(result, time_left, sleep)
 
 
-async def run_main(client_id, client_secret, redirect_uri, path, sleep):
+def run_main(client_id, client_secret, redirect_uri, path, sleep):
     sp = authorize(client_id, client_secret, redirect_uri)
     while True:
-        await main(sp, path, sleep)
+        main(sp, path, sleep)
 
 
 spotify_path = 'C:\\Users\\znaqv\\AppData\\Roaming\\Spotify\\Spotify.exe'
@@ -197,9 +196,8 @@ redirect_uri = 'http://localhost:8000'
 
 # to recreate the .exe file use command pyinstaller --onefile spotify_automate.py
 def run_program():
-    # Run the main loop using an event loop
     try:
-        asyncio.run(run_main(client_id, client_secret, redirect_uri, spotify_path, sleep_time))
+        run_main(client_id, client_secret, redirect_uri, spotify_path, sleep_time)
     except KeyboardInterrupt:
         open_spotify(spotify_path)
         os.system(f'taskkill /pid {os.getpid()} /f')
@@ -211,4 +209,5 @@ def run_program():
         run_program()
 
 
-run_program()
+if __name__ == '__main__':
+    run_program()
