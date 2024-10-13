@@ -21,10 +21,8 @@ def close_spotify():
 
 
 def is_spotify_running():
-    for process in psutil.process_iter():
-        if process.name() == 'Spotify.exe':
-            return True
-    return False
+    process_names = map(lambda proc: proc.name(), psutil.process_iter())
+    return 'Spotify.exe' in process_names
 
 
 def open_spotify(path):
