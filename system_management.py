@@ -9,16 +9,15 @@ import win32con
 import win32gui
 
 
-def prevent_sleep(es_continuous, es_system_required, es_display_required):
+def prevent_sleep():
+    es_continuous = 0x80000000
+    es_system_required = 0x00000001
+    es_display_required = 0x00000002
     ctypes.windll.kernel32.SetThreadExecutionState(es_continuous | es_system_required | es_display_required)
 
 
 def close_spotify():
     os.system("taskkill /im spotify.exe")
-
-
-def force_close_spotify():
-    os.system("taskkill /im spotify.exe /f")
 
 
 def is_spotify_running():
@@ -55,7 +54,7 @@ def wait_until_spotify_open(max_time, path):
         if time_elapsed >= max_time:
             break
         spotify_processes = [proc for proc in psutil.process_iter() if proc.name() == 'Spotify.exe']
-        if len(spotify_processes) >= 4:  # change value? original 5
+        if len(spotify_processes) >= 4:  # original 5
             print(f'spotify opened in %.3f seconds' % time_elapsed)
             break
 
@@ -74,6 +73,6 @@ def wait_until_spotify_closed(max_time):
         if time_elapsed >= max_time:
             break
         spotify_processes = [proc for proc in psutil.process_iter() if proc.name() == 'Spotify.exe']
-        if len(spotify_processes) <= 1:  # change value? original 1
-            print(f'spotify closed in {round(time_elapsed * 1000) / 1000} seconds')
+        if len(spotify_processes) <= 1:
+            print(f'spotify closed in {round(time_elapsed, 3)} seconds')
             break

@@ -17,11 +17,6 @@ client_id = os.getenv('SPOTIFY_CLIENT_ID')
 client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
 
 
-ES_CONTINUOUS = 0x80000000
-ES_SYSTEM_REQUIRED = 0x00000001
-ES_DISPLAY_REQUIRED = 0x00000002
-
-
 def authorize(client_id, client_secret, redirect_uri):
     auth_manager = SpotifyOAuth(client_id=client_id,
                                 client_secret=client_secret,
@@ -37,8 +32,15 @@ def spotify_running_check(result, path):
         open_play(path)
 
 
-def time_check(result, time_left, sleep):
-    if not (result and time_left):
+def print_time_left(result, time_left):
+    left = round(time_left / 1000, 1) if time_left is not None else 'N/A'
+    print(get_current_audio(result), f"({left} seconds left)")
+
+
+def time_check(result, sleep):
+    time_left = song_time_left(result)
+    print_time_left(result, time_left)
+    if not time_left:
         return
     time.sleep(min(sleep, 0.7 * time_left / 1000))
 
@@ -54,16 +56,11 @@ def advertisement_check(result, path):
 
 
 def main(sp, path, sleep):
-    prevent_sleep(ES_CONTINUOUS, ES_SYSTEM_REQUIRED, ES_DISPLAY_REQUIRED)
+    prevent_sleep()
     result = sp.current_playback()
+    time_check(result, sleep)
     if not advertisement_check(result, path):
         spotify_running_check(result, path)
-
-        time_left = song_time_left(result)
-        print(get_current_audio(result),
-              f"({round(time_left / 1000, 1) if time_left is not None else 'N/A'} seconds left)")
-
-        time_check(result, time_left, sleep)
 
 
 def run_main(client_id, client_secret, redirect_uri, path, sleep):

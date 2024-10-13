@@ -24,9 +24,10 @@ def is_advertisement_playing(result):
 def song_time_left(result):
     if not result:
         return None
-    # maybe remove/change the condition here
-    if not is_advertisement_playing(result):
-        progress_ms = result['progress_ms']
-        duration_ms = result['item']['duration_ms']
-        time_left_ms = duration_ms - progress_ms
-        return time_left_ms
+    if is_advertisement_playing(result):
+        return None
+
+    progress_ms = result['progress_ms']
+    duration_ms = result['item']['duration_ms']
+    time_left_ms = duration_ms - progress_ms
+    return time_left_ms
