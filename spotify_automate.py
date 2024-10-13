@@ -46,13 +46,14 @@ def time_check(result, sleep):
 
 
 def advertisement_check(result, path):
-    if is_advertisement_playing(result):
-        if result['is_playing']:
-            play_pause_media()
-        wait_until_spotify_closed(2)
-        open_play(path)
-        return True
-    return False
+    if not is_advertisement_playing(result):
+        return False
+
+    if result['is_playing']:
+        play_pause_media()
+    wait_until_spotify_closed(2)
+    open_play(path)
+    return True
 
 
 def main(sp, path, sleep):
