@@ -16,6 +16,23 @@ def prevent_sleep():
     ctypes.windll.kernel32.SetThreadExecutionState(es_continuous | es_system_required | es_display_required)
 
 
+def get_spotify_path():
+    def is_from_ms_store():
+        result = subprocess.run(["powershell", "-Command", "Get-AppxPackage *Spotify*"], capture_output=True,
+                                text=True, check=True)
+        return 'SpotifyAB.SpotifyMusic' in result.stdout
+
+    username = os.getlogin()
+    appdata_path = f'C:\\Users\\{username}\\AppData\\Roaming\\Spotify\\Spotify.exe'
+    microsoft_store_path = ['start', 'spotify:']
+
+    if os.path.exists(appdata_path):
+        return [appdata_path]
+    if is_from_ms_store():
+        return microsoft_store_path
+    raise FileNotFoundError('Spotify.exe not found')
+
+
 def close_spotify():
     os.system("taskkill /im spotify.exe")
 
@@ -26,7 +43,7 @@ def is_spotify_running():
 
 
 def open_spotify(path):
-    subprocess.Popen(path)
+    subprocess.Popen(path, shell='start' in path)
 
 
 def play_pause_media():
@@ -34,11 +51,11 @@ def play_pause_media():
 
 
 def open_spotify_behind(path):
-    subprocess.Popen(path)
+    open_spotify(path)
     # Wait for Spotify window to appear
     while True:
         window = win32gui.FindWindow(None, "Spotify Free")
-        if window != 0:
+        if window:
             break
     # Set Spotify window to be behind all other windows
     win32gui.SetWindowPos(window, win32con.HWND_BOTTOM, 0, 0, 0, 0, win32con.SWP_NOMOVE | win32con.SWP_NOSIZE)

@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 from audio_processing import get_current_audio, is_advertisement_playing, song_time_left
 from system_management import prevent_sleep, is_spotify_running, open_spotify, play_pause_media, open_play, \
-    wait_until_spotify_closed
+    wait_until_spotify_closed, get_spotify_path
 
 load_dotenv()
 
@@ -70,7 +70,7 @@ def run_main(client_id, client_secret, redirect_uri, path, sleep):
         main(sp, path, sleep)
 
 
-spotify_path = 'C:\\Users\\znaqv\\AppData\\Roaming\\Spotify\\Spotify.exe'
+spotify_path = get_spotify_path()
 sleep_time = 5
 
 redirect_uri = 'http://localhost:8000'
