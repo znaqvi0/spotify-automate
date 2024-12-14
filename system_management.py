@@ -2,25 +2,46 @@ import ctypes
 import os
 import subprocess
 import time
+import logging
 
 import psutil
 import pyautogui
 import win32con
 import win32gui
 
+# Constants for SetThreadExecutionState
+ES_CONTINUOUS = 0x80000000
+ES_SYSTEM_REQUIRED = 0x00000001
+ES_DISPLAY_REQUIRED = 0x00000002
+
+# Constants for Timeouts
+SPOTIFY_OPEN_TIMEOUT = 5
+SPOTIFY_CLOSE_TIMEOUT = 2
+SPOTIFY_PROCESS_THRESHOLD = 5
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def prevent_sleep():
-    es_continuous = 0x80000000
-    es_system_required = 0x00000001
-    es_display_required = 0x00000002
-    ctypes.windll.kernel32.SetThreadExecutionState(es_continuous | es_system_required | es_display_required)
+    ctypes.windll.kernel32.SetThreadExecutionState(
+        ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED
+    )
 
 
 def get_spotify_path():
     def is_from_ms_store():
-        result = subprocess.run(["powershell", "-Command", "Get-AppxPackage *Spotify*"], capture_output=True,
-                                text=True, check=True)
-        return 'SpotifyAB.SpotifyMusic' in result.stdout
+        try:
+            result = subprocess.run(
+                ['powershell', '-Command', 'Get-AppxPackage *Spotify*'],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            return 'SpotifyAB.SpotifyMusic' in result.stdout
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Error getting AppxPackage: {e}')
+            return False
 
     username = os.getlogin()
     appdata_path = f'C:\\Users\\{username}\\AppData\\Roaming\\Spotify\\Spotify.exe'
@@ -34,12 +55,14 @@ def get_spotify_path():
 
 
 def close_spotify():
-    os.system("taskkill /im spotify.exe")
+    try:
+        os.system('taskkill /im spotify.exe')
+    except Exception as e:
+        logging.error(f'Error closing Spotify: {e}')
 
 
 def is_spotify_running():
-    process_names = map(lambda proc: proc.name(), psutil.process_iter())
-    return 'Spotify.exe' in process_names
+    return any(proc.name() == 'Spotify.exe' for proc in psutil.process_iter())
 
 
 def open_spotify(path):
@@ -53,12 +76,20 @@ def play_pause_media():
 def open_spotify_behind(path):
     open_spotify(path)
     # Wait for Spotify window to appear
-    while True:
-        window = win32gui.FindWindow(None, "Spotify Free")
+    start_time = time.perf_counter()
+    window = None
+    while time.perf_counter() - start_time < SPOTIFY_OPEN_TIMEOUT:
+        window = win32gui.FindWindow(None, 'Spotify Free')
         if window:
             break
-    # Set Spotify window to be behind all other windows
-    win32gui.SetWindowPos(window, win32con.HWND_BOTTOM, 0, 0, 0, 0, win32con.SWP_NOMOVE | win32con.SWP_NOSIZE)
+
+    if window:
+        # Set Spotify window to be behind all other windows
+        win32gui.SetWindowPos(
+            window, win32con.HWND_BOTTOM, 0, 0, 0, 0, win32con.SWP_NOMOVE | win32con.SWP_NOSIZE
+        )
+    else:
+        logging.warning('Spotify window not found within timeout')
 
 
 def wait_until_spotify_open(max_time, path):
@@ -69,13 +100,14 @@ def wait_until_spotify_open(max_time, path):
         if time_elapsed >= max_time:
             break
         spotify_processes = [proc for proc in psutil.process_iter() if proc.name() == 'Spotify.exe']
-        if len(spotify_processes) >= 4:  # original 5
-            print(f'spotify opened in %.3f seconds' % time_elapsed)
+
+        if len(spotify_processes) >= SPOTIFY_PROCESS_THRESHOLD:
+            logging.info(f'spotify opened in %.3f seconds' % time_elapsed)
             break
 
 
 def open_play(path):
-    wait_until_spotify_open(5, path)
+    wait_until_spotify_open(SPOTIFY_OPEN_TIMEOUT, path)
     play_pause_media()
 
 
@@ -89,5 +121,5 @@ def wait_until_spotify_closed(max_time):
             break
         spotify_processes = [proc for proc in psutil.process_iter() if proc.name() == 'Spotify.exe']
         if len(spotify_processes) <= 1:
-            print(f'spotify closed in {round(time_elapsed, 3)} seconds')
+            logging.info(f'spotify closed in {round(time_elapsed, 3)} seconds')
             break
