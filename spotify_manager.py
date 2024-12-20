@@ -25,7 +25,7 @@ class SpotifyManager:
             system_manager.play_pause_media()
 
         system_manager.close_spotify_and_wait()
-        system_manager.open_spotify_behind()
+        system_manager.open_play()
 
     def get_current_playback(self):
         if not self.current_playback:
