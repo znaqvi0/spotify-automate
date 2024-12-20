@@ -8,8 +8,7 @@ from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
 
 from audio_processing import get_current_audio, is_advertisement_playing, song_time_left
-from system_management import prevent_sleep, is_spotify_running, play_pause_media, open_play, \
-    wait_until_spotify_closed, get_spotify_path, SPOTIFY_CLOSE_TIMEOUT
+from system_management import SystemManager
 
 load_dotenv()
 
@@ -29,11 +28,11 @@ def authorize(client_id, client_secret, redirect_uri):
     return spotipy.Spotify(auth_manager=auth_manager)
 
 
-def spotify_running_check(result, path):
+def spotify_running_check(result, sys_manager):
     if result:
         return
-    if not is_spotify_running():
-        open_play(path)
+    if not sys_manager.is_spotify_running():
+        sys_manager.open_play()
 
 
 def print_time_left(result, time_left):
@@ -49,39 +48,38 @@ def time_check(result, sleep_time):
     time.sleep(min(sleep_time, 0.7 * time_left / 1000))
 
 
-def advertisement_check(result, path):
+def advertisement_check(result, sys_manager):
     if not is_advertisement_playing(result):
         return False
 
     if result['is_playing']:
-        play_pause_media()
-    wait_until_spotify_closed(SPOTIFY_CLOSE_TIMEOUT)
-    open_play(path)
+        sys_manager.play_pause_media()
+    sys_manager.wait_until_spotify_closed()
+    sys_manager.open_play()
     return True
 
 
-def main(sp, path, sleep_time):
-    prevent_sleep()
+def main(sp, sys_manager, sleep_time):
+    sys_manager.prevent_sleep()
     result = sp.current_playback()
     time_check(result, sleep_time)
-    if not advertisement_check(result, path):
-        spotify_running_check(result, path)
+    if not advertisement_check(result, sys_manager):
+        spotify_running_check(result, sys_manager)
 
 
-def run_main(client_id, client_secret, redirect_uri, path, sleep_time):
+def run_main(client_id, client_secret, redirect_uri, sys_manager, sleep_time):
     sp = authorize(client_id, client_secret, redirect_uri)
     while True:
-        main(sp, path, sleep_time)
+        main(sp, sys_manager, sleep_time)
 
 
-spotify_path = get_spotify_path()
 sleep_time = 5
 
-
+sys_manager = SystemManager()
 # to recreate the .exe file use command pyinstaller --onefile spotify_automate.py
 def run_program():
     try:
-        run_main(client_id, client_secret, REDIRECT_URI, spotify_path, sleep_time)
+        run_main(client_id, client_secret, REDIRECT_URI, sys_manager, sleep_time)
     except KeyboardInterrupt:
         logging.info("Program interrupted by user. Shutting down...")
         os.system(f'taskkill /pid {os.getpid()} /f')
