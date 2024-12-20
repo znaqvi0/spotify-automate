@@ -89,7 +89,7 @@ class SystemManager:
             return microsoft_store_path
         raise FileNotFoundError('Spotify.exe not found')
 
-    def wait_until_spotify_open(self):
+    def open_spotify_and_wait(self):
         start_time = time.perf_counter()
         self.open_spotify_behind()
         while time.perf_counter() - start_time < SPOTIFY_OPEN_TIMEOUT:
@@ -100,7 +100,7 @@ class SystemManager:
         if not self.is_spotify_running():
             logging.warning('Spotify failed to open within timeout')
 
-    def wait_until_spotify_closed(self):
+    def close_spotify_and_wait(self):
         start_time = time.perf_counter()
         self.close_spotify()
         while time.perf_counter() - start_time < SPOTIFY_CLOSE_TIMEOUT:
@@ -116,5 +116,5 @@ class SystemManager:
         pyautogui.hotkey('playpause')
 
     def open_play(self):
-        self.wait_until_spotify_open()
+        self.open_spotify_and_wait()
         self.play_pause_media()
