@@ -7,7 +7,7 @@ import spotipy
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
 
-from audio_processing import get_current_audio, is_advertisement_playing, song_time_left
+from audio_processing import get_current_playback, is_ad_playing, song_time_left
 from system_management import SystemManager
 
 load_dotenv()
@@ -37,7 +37,7 @@ def spotify_running_check(result, sys_manager):
 
 def print_time_left(result, time_left):
     left = round(time_left / 1000, 1) if time_left is not None else 'N/A'
-    logging.info(f"{get_current_audio(result)} ({left} seconds left)")
+    logging.info(f"{get_current_playback(result)} ({left} seconds left)")
 
 
 def time_check(result, sleep_time):
@@ -49,7 +49,7 @@ def time_check(result, sleep_time):
 
 
 def advertisement_check(result, sys_manager):
-    if not is_advertisement_playing(result):
+    if not is_ad_playing(result):
         return False
 
     if result['is_playing']:
