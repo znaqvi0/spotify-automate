@@ -51,7 +51,6 @@ def main(sleep_interval):
 
 sleep_time = 5
 
-sys_manager = SystemManager()
 # to recreate the .exe file use command pyinstaller --onefile spotify_automate.py
 def run_program():
     try:
