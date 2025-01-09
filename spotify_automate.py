@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from spotify_manager import SpotifyManager
 from system_manager import SystemManager
 
-# Configure logging
+# configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def print_time_left(spotify_manager):

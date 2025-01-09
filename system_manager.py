@@ -9,17 +9,17 @@ import pyautogui
 import win32con
 import win32gui
 
-# Constants for SetThreadExecutionState
+# constants for SetThreadExecutionState
 ES_CONTINUOUS = 0x80000000
 ES_SYSTEM_REQUIRED = 0x00000001
 ES_DISPLAY_REQUIRED = 0x00000002
 
-# Constants for Timeouts
+# constants for timeouts
 SPOTIFY_OPEN_TIMEOUT = 5
 SPOTIFY_CLOSE_TIMEOUT = 2
 SPOTIFY_PROCESS_THRESHOLD = 5
 
-# Configure logging
+# configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class SystemManager:
