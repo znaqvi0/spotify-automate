@@ -12,6 +12,7 @@ from system_manager import SystemManager
 # configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 def print_time_left(spotify_manager):
     time_ms = spotify_manager.get_time_left()
     seconds_left = round(time_ms / 1000, 1) if time_ms is not None else 'N/A'
@@ -51,6 +52,7 @@ def main(sleep_interval):
 
 
 sleep_time = 5
+
 
 # to recreate the .exe file use command pyinstaller --onefile spotify_automate.py
 def run_program():
