@@ -2,6 +2,7 @@ import logging
 import os
 import time
 
+import psutil
 import requests.exceptions
 from dotenv import load_dotenv
 
@@ -63,6 +64,9 @@ def run_program():
         run_program()
     except requests.exceptions.ConnectionError:
         logging.warning("ConnectionError encountered. Restarting main loop...")
+        run_program()
+    except psutil.NoSuchProcess:
+        logging.warning("NoSuchProcess encountered. Restarting main loop...")
         run_program()
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}", exc_info=True)
