@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import time
 
 import psutil
@@ -58,7 +59,7 @@ def run_program():
         main(sleep_time)
     except KeyboardInterrupt:
         logging.info("Program interrupted by user. Shutting down...")
-        os.system(f'taskkill /pid {os.getpid()} /f')
+        sys.exit()
     except requests.exceptions.ReadTimeout:
         logging.warning("ReadTimeout encountered. Restarting main loop...")
         run_program()
