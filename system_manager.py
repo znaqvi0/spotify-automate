@@ -22,6 +22,7 @@ SPOTIFY_PROCESS_THRESHOLD = 5
 # configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 class SystemManager:
     def __init__(self):
         self.spotify_path = self.get_spotify_path()
