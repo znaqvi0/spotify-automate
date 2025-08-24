@@ -95,7 +95,7 @@ class SystemManager:
         self.open_spotify_behind()
         while time.perf_counter() - start_time < SPOTIFY_OPEN_TIMEOUT:
             if self.is_spotify_running():
-                logging.info(f'spotify opened in %.3f seconds' % (time.perf_counter() - start_time))
+                logging.info(f'Spotify opened in %.3f seconds' % (time.perf_counter() - start_time))
                 break
 
         if not self.is_spotify_running():
@@ -106,7 +106,7 @@ class SystemManager:
         self.close_spotify()
         while time.perf_counter() - start_time < SPOTIFY_CLOSE_TIMEOUT:
             if not self.is_spotify_running():
-                logging.info(f'spotify closed in %.3f seconds' % (time.perf_counter() - start_time))
+                logging.info(f'Spotify closed in %.3f seconds' % (time.perf_counter() - start_time))
                 break
 
         if self.is_spotify_running():
