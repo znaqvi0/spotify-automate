@@ -73,6 +73,7 @@ def run_program():
         run_program()
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}", exc_info=True)
+        input("Press Enter to exit...")
 
 
 if __name__ == '__main__':
